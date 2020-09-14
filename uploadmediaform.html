@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!-->
+<html class="no-js">
+<!--<![endif]-->
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="./loading.css">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+        integrity="sha384-9/reFTGAW83EW2RDu2S0VKaIzap3H66lZH81PoYlFhbGU+6BZp6G7niu735Sk7lN" crossorigin="anonymous">
+    </script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
+        integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8shuf57BaghqFfPlYxofvL8/KUEfYiJOMMV+rV" crossorigin="anonymous">
+    </script>
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.14.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment-with-locales.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js">
+    </script>
+    <script
+        src="https://cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/e8bddc60e73c1ec2475f827be36e1957af72e2ea/src/js/bootstrap-datetimepicker.js">
+    </script>
+    <!---use express.static()-->
+    <script src="./jquery.qrcode.min.js"></script>
+    <script>
+        // 如果user從 fb or line 開啟連結，則強制以 Safari or chrome 開啟，不使用 in-app webview
+        (function () {
+            var href = this.location.href;
+            // http 網址才處理
+            // if (href.indexOf("http") != 0 || href.indexOf("//") < 0) {
+            //     return;
+            // }
+            var u = navigator.userAgent,
+                ua = navigator.userAgent.toLowerCase(),
+                isLineApp = u.indexOf("Line") > -1, // Line 內建瀏覽器
+                isFbApp = u.indexOf("FBAV") > -1; // FB App 內建瀏覽器
+            if (isLineApp) {
+                if (u.indexOf("iPhone") > -1) {
+                    if (href.indexOf("?") < 0) {
+                        href += "?openExternalBrowser=1";
+                    } else {
+                        // 網址有參數 ? 時, 用 & 加參數
+                        href += "&openExternalBrowser=1";
+                    }
+                    // document.getElementById("test_text").innerHTML = "Line";
+                    // this.location.href = href;
+                    window.location.replace(href);
+                }
+                if (u.indexOf("Android") > -1) {
+                    window.location = "intent://" + this.location.host + this.location.pathname +
+                        "#Intent;scheme=http;package=com.android.chrome;end";
+                }
+            }
+            if (isFbApp) {
+                var url = this.location.href;
+                if (u.indexOf("iPhone") > -1) {
+                    window.location.replace(url.replace('http', 'googlechrome'));
+                }
+                if (u.indexOf("Android") > -1) {
+                    window.location = "intent://" + this.location.host + this.location.pathname +
+                        "#Intent;scheme=http;package=com.android.chrome;end";
+                }
+                // document.getElementById("test_text").innerHTML = u;
+            }
+        })();
+    </script>
+    <Style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        .blockarea {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            background-color: rgba(192, 192, 192, 0.8);
+            opacity: 0;
+            z-index: 20;
+        }
+
+        #popupmsg {
+            width: 100%;
+            height: 500px;
+            top: 70%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: snow;
+            position: fixed;
+            opacity: 0;
+            z-index: 20;
+            box-shadow: 5px 3px 20px rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+        }
+
+        #msgcontent {
+            width: auto;
+            height: auto;
+            position: relative;
+        }
+
+        #addbtn img {
+            width: 50px;
+            height: 50px;
+            bottom: 50px;
+            right: 5%;
+            position: fixed;
+            cursor: pointer;
+            z-index: 15;
+        }
+
+        #sendbtn {
+            width: 50px;
+            height: 50px;
+            bottom: 130px;
+            right: 5%;
+            position: fixed;
+            cursor: pointer;
+            z-index: 15;
+        }
+
+        #sendbtn input {
+            margin: 0;
+            padding: 0;
+            width: 50px;
+            height: 50px;
+        }
+
+        /* #imgdiv{
+            width: 150px;
+        } */
+        img.previewimg {
+            margin: 0;
+            padding: 0;
+            width: 150px;
+            height: 150px;
+            margin-left: 30px;
+        }
+
+        .deletebtn {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            position: absolute;
+            bottom: 0;
+            left: 200px;
+            cursor: pointer;
+            width: 30px;
+            height: 30px;
+        }
+
+        .deletebtn img {
+            margin: 0;
+            padding: 0;
+            width: inherit;
+            height: inherit;
+        }
+
+        .inputlist>li {
+            list-style: decimal;
+            position: relative;
+            margin: 10px;
+        }
+
+        .pointslist {
+            position: absolute;
+            top: 100px;
+            padding-right: 20px;
+        }
+
+        .pointslist>li {
+            list-style: decimal;
+            margin: 10px 0px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        form input.info {
+            width: 95%;
+            margin: 10px 10px;
+            /* margin: 5px 5px 5px 5px; */
+        }
+
+        div.please_enter {
+            font-size: 20px;
+        }
+
+        .required_sign {
+            margin: 0;
+            padding: 0;
+            font-size: larger;
+            color: red;
+            margin-left: 10px;
+        }
+
+        #happened_date {
+            width: 97%;
+            margin: 0px 0px 0px 10px;
+        }
+
+        .loadingpart {
+            position: fixed;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 70px;
+            top: 50%;
+            left: 50%;
+            z-index: 99;
+            transform: translate(-50%, -50%);
+            display: none;
+        }
+    </Style>
+</head>
+
+<body>
+    <!--[if lt IE 7]>
+            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
+        <![endif]-->
+    <div class="blockarea">
+
+    </div>
+    <div class="msg" id="popupmsg">
+        <div id="msgcontent">
+            <h2 style="position: absolute; left: 10px; width: 90%;">注意事項及操作步驟 / Notes and Manual:</h2>
+            <span id="closebtn"
+                style="position:absolute; display: block; background-image: url('./close.png'); width: 40px; height: 40px; top: 10px; right:10px; cursor: pointer;"></span>
+            <ul class="pointslist">
+                <li>此系統僅供處理人員統整事故相關資料，您的資料將不會作為其他使用。</li>
+                <li>上傳檔案只能為圖檔或是影片檔</li>
+                <li><b style="color: red;">影片檔請注意大小不要超過 10 mb</b></li>
+                <li>點擊 <img style="width: 30px; height: 30px;" src="./add.jpg" alt=""> 按鈕可增加您想上傳的檔案</li>
+                <li>點擊 <img style="width: 30px; height: 30px;" src="./cancel.png"> 按鈕可刪除該檔案</li>
+                <li>標記 <span class="required_sign">*</span> 的欄位為必填的項目</li>
+                <li>點擊 <img style="width: 30px; height: 30px;" src="./send.jpg"> 送出您的資訊</li>
+                <li>事故地址可藉由 google map 進行定位</li>
+                <li><b style="color: red;">全部檔案請注意大小不要超過 30 mb</b></li>
+            </ul>
+        </div>
+    </div>
+    <div id="addbtn">
+        <img src="./add.jpg" alt="">
+    </div>
+    <!-- <div id="qrcode"></div> -->
+    <form action="/upload" id="uploadform" method="post" enctype="multipart/form-data" autocomplete="off">
+        <div class="please_enter"><span class="required_sign">*</span> <b>請輸入事故地址 : </b></div><button type="button"
+            onclick="window.open('./definelocation', 'blank')">使用 google map 進行定位</button><br><input
+            class="info required" type="text" id="accident_address" name="accident_address" autofocus>
+        <br>
+        <!-- <span class="required_sign">*</span> 請輸入<b>事故時間</b> : <br><input class="info required" type="text"
+            name="happened_date" autofocus>
+        <br> -->
+        <div class="please_enter"><span class="required_sign">*</span> <b>請輸入事故時間 :</b></div>
+        <div style="width: 80%;" class='input-group date' id='datetimepicker1'>
+            <input type='text' id="happened_date" name="happened_date" class="info required form-control"
+                onkeydown="return false" />
+            <span class="input-group-addon">
+                <span class="glyphicon glyphicon-calendar"></span>
+            </span>
+        </div>
+        <div class="please_enter"><span class="required_sign"></span> <b>請輸入通知人姓名 : </b></div><br><input class="info"
+            type="text" name="informer_name" autofocus>
+        <br>
+        <div class="please_enter"><span class="required_sign"></span> <b>請輸入通知人電話 : </b></div><br><input class="info"
+            type="tel" name="informer_phonenumber" pattern="09[0-9]{8}" autofocus required>
+        <br>
+        <div class="please_enter"><span class="required_sign">*</span> <b>請輸入駕駛人姓名 : </b></div><br><input
+            class="info required" type="text" name="driver_name" autofocus>
+        <br>
+        <div class="please_enter"><span class="required_sign">*</span> <b>請輸入駕駛人電話 : </b></div><br><input
+            class="info required" type="tel" name="driver_phonenumber" pattern="09[0-9]{8}" autofocus>
+        <br>
+        <div class="please_enter"><span class="required_sign">*</span> <b>請輸入車牌號碼 : </b></div><br><input
+            class="info required" type="text" name="license_plate_number" autofocus>
+        <br>
+        <div class="please_enter">&nbsp; &nbsp; 備註 : </div><br><input class="info" type="text" name="note" autofocus>
+        <br>
+        &nbsp; &nbsp;累計檔案大小 : <span id="total_size_of_file">0</span> mb
+        <ul class="inputlist">
+            <!-- <li>
+                <input id="input_1" class="info required" type="file" accept="video/*, image/*"
+                    name="filetoupload"><span class="deletebtn"><img src="./cancel.png" alt=""></span>
+                <img id="previewimg_1" class="previewimg" src="" alt="">
+            </li> -->
+        </ul>
+        <!-- <div id="sendbtn">
+            <input type="image" name="submit" value="送出" src="./send.jpg">
+        </div> -->
+    </form>
+    <div id="sendbtn">
+        <input type="image" name="submit" value="送出" src="./send.jpg">
+    </div>
+    <div class="loadingpart">
+        <div class="ml-loader">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
+        </div>
+        <p id="wait_msg">請稍後，傳送完成速度視檔案大小而定...</p>
+    </div>
+    <!-- <button id="test_cover">test cover</button>
+    <button id="test_auth">test auth</button> -->
+    <script>
+        // window.onbeforeunload = function () {
+        //     return "onbeforeunload is work";
+        // }
+        window.onload = function () {
+            var accident_address_input = document.getElementById("accident_address");
+            // 將地圖中獲取到的地址傳到表單頁內
+            window.addEventListener("storage", function () { // Listen when local storage changes
+                if (Object.keys(window.localStorage).length !== 0) {
+                    if ("confirmedAddress" in window.localStorage && window.localStorage[
+                            "confirmedAddress"] !== undefined) {
+                        accident_address_input.value = window.localStorage.getItem("confirmedAddress");
+                        window.localStorage.removeItem("confirmedAddress"); // 帶入後刪除該 storage
+                    } else {
+                        document.getElementById("accident_address").value = "";
+                    }
+                }
+            });
+
+
+            $(function () {
+                var i = $('.inputlist>li').length;
+                // console.log(i);
+                //判斷 pop up 只顯示一次，關閉後不再顯示，除非清 cookie 
+                const cookieValuePair = document.cookie.split('; ');
+                if (!cookieValuePair.includes("isShowMsg=1")) {
+                    (function () {
+                        $(".blockarea").animate({
+                            opacity: 1
+                        }, {
+                            queue: false,
+                            duration: 800,
+                            complete: function () {
+                                $('#popupmsg').animate({
+                                    opacity: 1,
+                                    top: "-=20%"
+                                }, {
+                                    duration: 2000,
+                                    complete: function () {
+                                        $("#closebtn").on("click", function () {
+                                            $("#popupmsg").remove();
+                                            $(".blockarea").css(
+                                                "display", "none");
+                                            document.cookie =
+                                                "isShowMsg=1";
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    })();
+                } else {
+                    $("#popupmsg").remove();
+                    $(".blockarea").css("display", "none");
+                }
+                // 設置時間選擇器
+                $('#datetimepicker1').datetimepicker({
+                    locale: 'zh-TW'
+                });
+                // 累計檔案大小初始化
+                var total_size = 0;
+                $("#total_size_of_file").on("DOMSubtreeModified", function () {
+                    if (parseInt($(this).text()) >= 30) {
+                        $(this).css('color', 'red');
+                    } else {
+                        $(this).css('color', '');
+                    }
+                });
+                // 設置圖片預覽
+                $(document).on("change", "input[name='filetoupload']", function () {
+                    // 暫存現有檔案 size
+                    var temp_size = 0;
+
+                    function readURL(input) {
+                        if (input.files && input.files.length == 1) {
+                            var reader = new FileReader();
+                            // console.log(input.files);
+                            // console.log(input)
+                            $input = input;
+                            let index = $input.id.split('_')[1];
+                            // console.log($input.parentElement.childNodes);
+                            reader.onload = function (e) { // 實際加載預覽
+                                $("#previewimg_" + index).attr('src', e.target.result);
+                            }
+                            reader.readAsDataURL(input.files[0]); // convert image to base64 string
+                        }
+                    }
+                    readURL(this);
+                    $(this).siblings('.previewimg').css("display", "block");
+                    // console.log("size in bytes : " + this.files[0].size);
+                    // 計算 files 大小
+                    $allInput = $("ul.inputlist>li>input[name='filetoupload']");
+                    // console.log($allInput);
+                    for (let element of $allInput) {
+                        // console.log(element)
+                        try {
+                            temp_size += Math.floor(element.files[0].size / 1000);
+                        } catch (e) {
+                            temp_size += 0;
+                        }
+                    }
+                    $("#total_size_of_file").text(temp_size / 1000);
+                    // console.log("current total : " + temp_size);
+                    return total_size = temp_size;
+                });
+
+                // 添加 input
+                $("#addbtn").on('click', function () {
+                    var i = Date.now();
+                    var $newinput = $(
+                        "<li>" +
+                        "<input id='input_" + i +
+                        "' class='info required' type='file' accept='video/*, image/*' name='filetoupload'>" +
+                        "<span class='deletebtn'><img src='./cancel.png' alt=''></span>" +
+                        "</li>"
+                    );
+                    var $newpreview = $(
+                        "<img id='previewimg_" + i + "' class='previewimg' src='' alt=''>").on(
+                        'error',
+                        function () {
+                            $(this).hide();
+                        });
+                    // var $newpreview = $(
+                    //     "<img id='previewimg_" + i + "' class='previewimg' src='' alt=''>");
+                    $newinput.append($newpreview);
+                    $newinput.appendTo($('form>ul.inputlist'));
+                    window.scrollTo(0,document.body.scrollHeight);
+                });
+
+                // $('img.previewimg').on('error', function (){
+                //     console.log(this);
+                // });
+                $(document).on('click', 'li>span.deletebtn', function () { //事件委託給新建元素 (deletebtn)
+                    $previousEle = this.parentElement;
+                    $previousEle.remove();
+                    try {
+                        total_size -= Math.floor(this.previousElementSibling.files[0].size / 1000);
+                    } catch (e) {
+                        total_size -= 0;
+                    }
+                    console.log(total_size);
+                    $("#total_size_of_file").text(total_size / 1000);
+                    return total_size;
+                });
+
+                var isAllTyped;
+                $("#sendbtn").on("click", function () {
+                    var obj = $('form input.info.required');
+                    console.log(obj);
+                    isAllTyped = false;
+                    for (const key in obj) {
+                        if (obj[key].value == "") {
+                            alert("您有未填入的欄位");
+                            isAllTyped = false;
+                            break;
+                        } else if (obj[key].value != "") {
+                            isAllTyped = true;
+                            continue;
+                        }
+                    }
+                    if (isAllTyped == true) {
+                        $(".blockarea").css({
+                            "opacity": 1,
+                            "display": "block"
+                        });
+                        $(".loadingpart").css("display", "block");
+                        $("#uploadform").submit(); // 等到 loading bar 出現後才做 submit
+                    }
+                });
+                // 設置qrcode
+                $('#qrcode').qrcode({
+                    render: "table",
+                    text: window.location.href
+                });
+                // $("#test_cover").on('click', function () {
+
+                //     $(".blockarea").css({
+                //         "opacity": 1,
+                //         "display": "block"
+                //     });
+                //     $(".loadingpart").css("display", "block");
+                //     // $.ajax({
+                //     //     type: 'GET',
+                //     //     url: "/createtoken"
+                //     // }).done(function (data){
+                //     //    $(document.body).html(data);
+                //     // }).fail(function (){
+                //     //     alert("FAIL");
+                //     // });
+                // });
+                // $("#test_auth").on('click', function () {
+                //     $.ajax({
+                //         type: "POST",
+                //         url: "/upload",
+
+                //     }).done(function (data) {
+                //         $(document.body).html(data);
+                //     }).fail(function () {
+                //         alert("FAIL");
+                //     });
+                // })
+            });
+        }
+    </script>
+    <script src="" async defer></script>
+</body>
+
+</html>

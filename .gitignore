@@ -1,0 +1,5 @@
+# ignore folder
+imagefolder/
+logfolder/
+zipfolder/
+node_modules/
